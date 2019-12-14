@@ -19,17 +19,21 @@ int vEB::index(int i, int j){
 }
 
 int vEB::high(int x){
+    if(num_clustures == 0){
+        return -1;
+    }
     return x / num_clustures;
 }
 
 int vEB::low(int x){
+    if(num_clustures == 0){
+        return x;
+    }
     return x % num_clustures;
 }
 
 void vEB::insert(int x){
-    if(min == -1){
-        min = x;
-        max = x;
+    if(x == min | x == max){
         return;
     }
     if(x < min){
@@ -37,29 +41,47 @@ void vEB::insert(int x){
         min = x;
         x = temp;
     }
+    if(min == -1){
+        min = x;
+        max = x;
+        return;
+    }
     if(x > max){
         max = x;
     }
-    if(clustures[high(x)]->min == -1){
-        summary->insert(high(x));
+    int h = high(x);
+    if(h != -1){
+        if(clustures[high(x)]->min == -1){
+            summary->insert(high(x));
+        }
+        clustures[high(x)]->insert(low(x));
     }
-    clustures[high(x)]->insert(low(x));
 }
 
 int vEB::successor(int x){
+    //cout << "searching for " << x << endl;
+    //cout << "min " << min << endl;
+    //cout << "max " << max << endl;
     if(x < min){
         return min;
     }
     if(x > max){
-        cout << "NOT FOUND" << endl;
+        //cout << "NOT FOUND" << endl;
         return -1;
     }
     int i = high(x);
     int j = 0;
+    if(i == -1){
+        return max;
+    }
+    //cout << "high is " << i << endl;
+    //cout << "clustures size is " << num_clustures << endl;
     if(low(x) < clustures[i]->max){
         j = clustures[i]->successor(low(x));
     } else{
+    //    cout << "searching for summary's succ " << i << endl;
         i = summary->successor(i);
+    //   cout << "summary's successor is " << i << endl;
         j = clustures[i]->min;
     }
     return index(i,j);
